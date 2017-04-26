@@ -20,14 +20,13 @@ defmodule Junk do
   end
   def junk(junk_type, opts \\ @default_opts) do
     new_opts = merged_opts(opts)
-    bytes = random_bytes(new_opts)
-    junk_for_type(junk_type, bytes, new_opts)
+    junk_for_type(junk_type, new_opts)
   end
 
-  defp junk_for_type(:"Elixir.String", bytes, _opts) do
-    bytes |> Base.url_encode64
+  defp junk_for_type(:"Elixir.String", opts) do
+    random_bytes(opts) |> Base.url_encode64
   end
-  defp junk_for_type(:"Elixir.Integer", _bytes, opts) do
+  defp junk_for_type(:"Elixir.Integer", opts) do
     min = :math.pow(10, opts.length-1) |> trunc
     max = :math.pow(10, opts.length)-1 |> trunc
     Range.new(min,max) |> Enum.random

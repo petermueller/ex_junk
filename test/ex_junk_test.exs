@@ -2,8 +2,11 @@ defmodule JunkTest do
   use ExUnit.Case
   doctest Junk
 
-  test "no args default junk" do
-    assert is_binary(Junk.junk) == true
+  test "no args defaults .junk to String" do
+    output = Junk.junk(String)
+    assert is_binary(output) == true
+    assert String.printable?(output) == true
+    assert output != Junk.junk(String)
   end
 
   test "returns unique Strings" do
