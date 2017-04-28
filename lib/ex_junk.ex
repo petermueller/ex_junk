@@ -6,37 +6,47 @@ defmodule Junk do
 
   @inject %{random_bytes: &:crypto.strong_rand_bytes/1}
 
-  @default_opts %{
+  @default_opts [
+    byte_size: 32,
+    prefix: "",
     rand_mod: @inject,
-    length: 16
-  }
+    size: 16
+  ]
 
   @doc """
-  Returns junk.
+  Returns junk(String).
   """
   def junk, do: junk(String, @default_opts)
-  def junk(opts) when is_map(opts) do
-    junk(String, merged_opts(opts))
+
+  @doc """
+  Returns junk(String, opts)
+  """
+  def junk(opts) when is_list(opts) do
+    junk(String, opts)
   end
+
+  @doc """
+  Takes a Module (String, Integer), and options, returns junk for that Module.
+  """
   def junk(junk_type, opts \\ @default_opts) do
-    new_opts = merged_opts(opts)
-    junk_for_type(junk_type, new_opts)
+    merged_opts = @default_opts
+    |> Keyword.merge(opts)
+    |> Enum.into(%{})
+    junk_for_type(junk_type, merged_opts)
   end
 
   defp junk_for_type(:"Elixir.String", opts) do
-    random_bytes(opts) |> Base.url_encode64
+    string = random_bytes(opts)
+    |> Base.url_encode64
+    opts.prefix <> "-" <> string
   end
   defp junk_for_type(:"Elixir.Integer", opts) do
-    min = :math.pow(10, opts.length-1) |> trunc
-    max = :math.pow(10, opts.length)-1 |> trunc
+    min = :math.pow(10, opts.size-1) |> trunc
+    max = :math.pow(10, opts.size)-1 |> trunc
     Range.new(min,max) |> Enum.random
   end
 
-  defp random_bytes(%{length: length, rand_mod: rand_mod}) do
-    rand_mod.random_bytes.(length)
-  end
-
-  defp merged_opts(opts) do
-    Map.merge(@default_opts, opts)
+  defp random_bytes(%{rand_mod: rand_mod, byte_size: b_size}) do
+    rand_mod.random_bytes.(b_size)
   end
 end
