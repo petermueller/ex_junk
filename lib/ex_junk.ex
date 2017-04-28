@@ -7,7 +7,9 @@ defmodule Junk do
   defstruct byte_size: 32,
     prefix: "",
     rand_mod: &:crypto.strong_rand_bytes/1,
-    size: 16
+    size: 16,
+    presets: Application.get_all_env(:ex_junk),
+    parameters: []
 
   @doc """
   Takes a Module (String, Integer) and options, returns junk for that Module.
@@ -32,7 +34,17 @@ defmodule Junk do
     Range.new(min,max) |> Enum.random
   end
 
-  def junk(regex = %{__struct__: Regex}, opts) do
+  def junk(f, opts) when is_function(f) do
+    opts = construct_opts(opts)
+    apply(f, opts.parameters)
+  end
+
+  def junk(preset_name, opts) when is_atom(preset_name) do
+    opts = construct_opts(opts)
+    case get_in(opts, [:presets, preset_name]) do
+      f when is_function(f) -> apply(Junk, :junk, [f, opts])
+      params -> apply(Junk, :junk, params)
+    end
   end
 
   defp construct_opts(opts) do
