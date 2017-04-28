@@ -38,7 +38,7 @@ defmodule Junk.Mixfile do
   #
   # Type "mix help deps" for more examples and options
   defp deps do
-    [{:double, "~>0.4", only: :test}]
+    []
   end
 
   defp description do
