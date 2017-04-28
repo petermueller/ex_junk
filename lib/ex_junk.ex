@@ -32,6 +32,9 @@ defmodule Junk do
     Range.new(min,max) |> Enum.random
   end
 
+  def junk(regex = %{__struct__: Regex}, opts) do
+  end
+
   defp construct_opts(opts) do
     Enum.into(opts, Map.from_struct(%Junk{}))
   end
