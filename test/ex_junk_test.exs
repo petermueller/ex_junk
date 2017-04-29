@@ -2,7 +2,14 @@ defmodule JunkTest do
   use ExUnit.Case
   doctest Junk
 
-  test "no args defaults .junk to String" do
+  test "no parameters whatsoever returns random string" do
+    output = Junk.junk
+    assert is_binary(output) == true
+    assert String.printable?(output) == true
+    assert output != Junk.junk(String)
+  end
+
+  test "no option defaults .junk to String" do
     output = Junk.junk(String)
     assert is_binary(output) == true
     assert String.printable?(output) == true
@@ -28,6 +35,11 @@ defmodule JunkTest do
     assert String.starts_with?(output, "prefix-")
   end
 
+  test "returns just the random string if no prefix is defined" do
+    output = Junk.junk(String)
+    assert String.at(output, 0) != "-"
+  end
+
   test "returns unique Integers" do
     assert Junk.junk(Integer) |> is_integer == true
     assert Junk.junk(Integer) != Junk.junk(Integer)
@@ -49,6 +61,12 @@ defmodule JunkTest do
     assert "1-result" = output
     output2 = Junk.junk(f, parameters: [2])
     assert "2-result" = output2
+  end
+
+  test "returns a preset value when a preset is not defined" do
+    output = Junk.junk(:firstname)
+    assert String.starts_with?(output, "firstname")
+    assert String.length(output) > String.length("firstname-")
   end
 
   test "returns a preset value when a preset is defined and used" do

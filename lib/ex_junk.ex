@@ -5,7 +5,7 @@ defmodule Junk do
   """
 
   defstruct byte_size: 32,
-    prefix: "",
+    prefix: false,
     rand_mod: &:crypto.strong_rand_bytes/1,
     size: 16,
     presets: Application.get_all_env(:ex_junk),
@@ -14,7 +14,7 @@ defmodule Junk do
   @doc """
   Takes a Module (String, Integer) and options, returns junk for that Module.
   """
-  def junk(_, opts \\ [])
+  def junk(_ \\ String, opts \\ [])
 
   def junk(opts, _) when is_list(opts) do
     junk(String, opts)
@@ -24,14 +24,15 @@ defmodule Junk do
     opts = construct_opts(opts)
     string = opts.rand_mod.(opts.byte_size)
     |> Base.url_encode64
-    opts.prefix <> "-" <> string
+    post_op(string, opts)
   end
 
   def junk(Integer, opts) do
     opts = construct_opts(opts)
     min = :math.pow(10, opts.size-1) |> trunc
     max = :math.pow(10, opts.size)-1 |> trunc
-    Range.new(min,max) |> Enum.random
+    output = Range.new(min,max) |> Enum.random
+    post_op(output, opts)
   end
 
   def junk(f, opts) when is_function(f) do
@@ -42,12 +43,17 @@ defmodule Junk do
   def junk(preset_name, opts) when is_atom(preset_name) do
     opts = construct_opts(opts)
     case get_in(opts, [:presets, preset_name]) do
-      f when is_function(f) -> apply(Junk, :junk, [f, opts])
-      params -> apply(Junk, :junk, params)
+      f when is_function(f) -> Junk.junk(f, opts)
+      params when is_list(params) -> apply(Junk, :junk, params)
+      _ -> Junk.junk(String, prefix: Atom.to_string(preset_name))
     end
   end
 
   defp construct_opts(opts) do
     Enum.into(opts, Map.from_struct(%Junk{}))
+  end
+
+  defp post_op(output, opts) do
+    output = if opts.prefix, do: "#{opts.prefix}-#{output}", else: output
   end
 end
