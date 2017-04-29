@@ -86,6 +86,9 @@ defmodule JunkTest do
   end
 
   test "returns are not unique by default" do
+    # :ssn always returns the same value.
+    # If this was forced to be unique, it would loop endlessly trying 
+    # to find a unique second value.
     output = Junk.junk(:ssn)
     assert "123-45-6789" = output
     output = Junk.junk(:ssn)
