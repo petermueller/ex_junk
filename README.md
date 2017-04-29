@@ -3,6 +3,8 @@ Junk is a module for generating Junk data in your tests.
 For when you don't care about the content, just that it has the right 'shape'.
 It is inspired by Dave Brady's [rspec-junklet](https://github.com/dbrady/rspec-junklet)
 
+[![Build Status](https://travis-ci.org/felix-starman/ex_junk.svg?branch=master)](https://travis-ci.org/felix-starman/ex_junk)
+
 ## Installation
 
 The package can be installed by adding `ex_junk` to your list of dependencies in `mix.exs`:
