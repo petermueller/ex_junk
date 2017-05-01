@@ -37,4 +37,9 @@ defmodule JunkTest do
     digits = Junk.junk(Integer, size: 25) |> Integer.digits
     assert Kernel.length(digits) == 25
   end
+
+  test "returns arbitrarily large Integers" do
+    digits = Junk.junk(Integer, size: 2048) |> Integer.digits
+    assert Kernel.length(digits) == 2048
+  end
 end
