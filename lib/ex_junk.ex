@@ -40,13 +40,22 @@ defmodule Junk do
     |> Base.url_encode64
     opts.prefix <> "-" <> string
   end
+
   defp junk_for_type(:"Elixir.Integer", opts) do
-    min = :math.pow(10, opts.size-1) |> trunc
-    max = :math.pow(10, opts.size)-1 |> trunc
-    Range.new(min,max) |> Enum.random
+    min = pow(10, opts.size - 1)
+    max = pow(10, opts.size) - 1
+
+    :crypto.rand_uniform(min, max)
   end
 
   defp random_bytes(%{rand_mod: rand_mod, byte_size: b_size}) do
     rand_mod.random_bytes.(b_size)
+  end
+
+  defp pow(_base, 0), do: 1
+  defp pow(base, exp) when rem(exp, 2) == 1, do: base * pow(base, exp - 1)
+  defp pow(base, exp) do
+    result = pow(base, div(exp, 2))
+    result * result
   end
 end
