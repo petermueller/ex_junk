@@ -35,11 +35,14 @@ defmodule Junk do
     junk_for_type(junk_type, merged_opts)
   end
 
+  defp junk_for_type(:"Elixir.String", %{prefix: nil} = opts), do: random_string(opts)
+  defp junk_for_type(:"Elixir.String", %{prefix: ""} = opts), do: random_string(opts)
   defp junk_for_type(:"Elixir.String", opts) do
-    string = random_bytes(opts)
-    |> Base.url_encode64
-    opts.prefix <> "-" <> string
+    opts
+    |> random_string
+    |> String.replace_prefix("", opts.prefix <> "-")
   end
+
   defp junk_for_type(:"Elixir.Integer", opts) do
     min = :math.pow(10, opts.size-1) |> trunc
     max = :math.pow(10, opts.size)-1 |> trunc
@@ -48,5 +51,9 @@ defmodule Junk do
 
   defp random_bytes(%{rand_mod: rand_mod, byte_size: b_size}) do
     rand_mod.random_bytes.(b_size)
+  end
+
+  defp random_string(opts) do
+    opts |> random_bytes |> Base.url_encode64
   end
 end
