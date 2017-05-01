@@ -28,6 +28,14 @@ defmodule JunkTest do
     assert String.starts_with?(output, "prefix-")
   end
 
+  test "String doesn't start with dash if prefix empty" do
+    output_with_blank_prefix = Junk.junk(String)
+    output_with_nil_prefix = Junk.junk(String, prefix: nil)
+
+    refute String.starts_with?(output_with_blank_prefix, "-")
+    refute String.starts_with?(output_with_nil_prefix, "-")
+  end
+
   test "returns unique Integers" do
     assert Junk.junk(Integer) |> is_integer == true
     assert Junk.junk(Integer) != Junk.junk(Integer)
