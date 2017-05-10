@@ -32,7 +32,7 @@ defmodule JunkTest do
 
   test "returns Strings with an optional prefix" do
     output = Junk.junk(String, prefix: "prefix")
-    assert String.starts_with?(output, "prefix-")
+    assert "prefix-" <> _x = output
   end
 
   test "returns just the random string if no prefix is defined" do
@@ -65,21 +65,51 @@ defmodule JunkTest do
 
   test "returns a preset value when a preset is not defined" do
     output = Junk.junk(:firstname)
-    assert String.starts_with?(output, "firstname")
-    assert String.length(output) > String.length("firstname-")
+    assert "firstname-" <> _ = output
+  end
+
+  test "obeys options when returning a preset value when a preset is not defined" do
+    output = Junk.junk(:firstname, byte_size: 10)
+    assert String.length(output) == 20 # incidentally, this seems kind of dumb; why not 10?
   end
 
   test "returns a preset value when a preset is defined and used" do
+    # :phone here is defined in config/test.exs
     output = Junk.junk(:phone)
     assert 10 = length(output |> Integer.digits)
   end
 
   test "returns a preset value when a preset function is used" do
+    # :ssn here is defined in config/test.exs
     output = Junk.junk(:ssn)
     assert "123-45-6789" = output
   end
 
+  test "returns are not unique by default" do
+    # :ssn always returns the same value.
+    # If this was forced to be unique, it would loop endlessly trying 
+    # to find a unique second value.
+    output = Junk.junk(:ssn)
+    assert "123-45-6789" = output
+    output = Junk.junk(:ssn)
+    assert "123-45-6789" = output
+  end
+
+  test "returns can be made unique" do
+    # :color here is defined in config/test.exs
+    output1 = Junk.junk(:color, unique: true)
+    output2 = Junk.junk(:color, unique: true)
+    output3 = Junk.junk(:color, unique: true)
+    assert output1 != output2
+    assert output2 != output3
+    assert output3 != output1
+  end
+
   def ssn do
     "123-45-6789"
+  end
+
+  def color do
+    Enum.random(["red", "white", "blue"])
   end
 end
