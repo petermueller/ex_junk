@@ -39,26 +39,11 @@ defmodule Junk do
     opts = construct_opts(opts)
     |> Map.put(:size, 8)
     # grab 8 digits, and put a 1 or 2 on the front
-    base_digits = junk(Integer, opts)
+    junk(Integer, opts)
     |> Integer.digits
     |> (fn digits -> [8,0,8,4,0] ++ [Enum.random(1..2)] ++ digits end).()
-
-    # starting from the right, doubles digits
-    # splits into 2 digits where needed
-    # sums, and adds 24 (for the 80840 of the longer form npi)
-    check_sum = base_digits
-    |> Enum.reverse
-    |> Junk.map_every(2, fn(n) ->Integer.digits(n*2) end)
-    |> List.flatten
-    |> Enum.sum
-
-    # calcs the check digit
-    check_digit = case Kernel.rem(check_sum, 10) do
-      0 -> 0
-      n -> 10 - n
-    end
-
-    (base_digits ++ [check_digit]) |> Integer.undigits
+    |> Integer.undigits
+    |> Junk.luhn
   end
 
   def junk(:npi, opts) do
@@ -79,6 +64,23 @@ defmodule Junk do
     end
   end
 
+  def luhn(number) do
+    base_digits = Integer.digits(number)
+    check_sum = base_digits
+    |> Enum.reverse
+    |> Junk.map_every(2, fn(n) ->Integer.digits(n*2) end)
+    |> List.flatten
+    |> Enum.sum
+
+    # calcs the check digit
+    check_digit = case Kernel.rem(check_sum, 10) do
+      0 -> 0
+      n -> 10 - n
+    end
+
+    (base_digits ++ [check_digit]) |> Integer.undigits
+  end
+
   def map_every(enumerable, nth, mapper) do
     {res, _acc} = Enum.map_reduce(enumerable, 0, fn(x, i) -> if (rem(i, nth) == 0) do
         {mapper.(x), i+1}
@@ -94,6 +96,6 @@ defmodule Junk do
   end
 
   defp post_op(output, opts) do
-    output = if opts.prefix, do: "#{opts.prefix}-#{output}", else: output
+    if opts.prefix, do: "#{opts.prefix}-#{output}", else: output
   end
 end

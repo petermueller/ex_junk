@@ -99,6 +99,10 @@ defmodule JunkTest do
     assert Enum.member?([808401,808402], first_6)
   end
 
+  test "luhn returns a luhn'd number" do
+    assert Junk.luhn(80840268496713) == 808402684967138
+  end
+
   def ssn do
     "123-45-6789"
   end
