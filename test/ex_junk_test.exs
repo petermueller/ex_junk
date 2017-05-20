@@ -23,6 +23,13 @@ defmodule JunkTest do
     assert output != Junk.junk(String, byte_size: 5)
   end
 
+  test "unnecessary options are ignored" do
+    string = Junk.junk(String, size: 10)
+    integer = Junk.junk(Integer, byte_size: "asdf")
+    assert is_binary(string) == true
+    assert integer |> is_integer == true
+  end
+
   test "returns unique Strings" do
     output = Junk.junk(String)
     assert is_binary(output) == true
@@ -77,6 +84,23 @@ defmodule JunkTest do
   test "returns a preset value when a preset function is used" do
     output = Junk.junk(:ssn)
     assert "123-45-6789" = output
+  end
+
+  test ":npi returns a short NPI" do
+    digits = Junk.junk(:npi) |> Integer.digits
+    assert Kernel.length(digits) == 10
+    assert Enum.member?([1,2], List.first(digits))
+  end
+
+  test ":long_npi returns a long NPI" do
+    digits = Junk.junk(:long_npi) |> Integer.digits
+    assert Kernel.length(digits) == 15
+    first_6 = digits |> Enum.take(6) |> Integer.undigits
+    assert Enum.member?([808401,808402], first_6)
+  end
+
+  test "luhn returns a luhn'd number" do
+    assert Junk.luhn(80840268496713) == 808402684967138
   end
 
   def ssn do
